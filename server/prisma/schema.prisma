@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String   @unique
+  password String
+  image    String
+  type     UserType
+
+  order Order[] @relation("UserOrder")
+  @@map("user")
+}
+
+enum UserType {
+  ADMIN
+  CONSUMER
+}
+
+model Restaurant {
+  id         Int             @id @default(autoincrement())
+  name       String          @unique
+  address    String
+  image      String
+  type       RESTAURANT_TYPE
+  priceLevel Int
+
+  operatingHour   OperatingHour @relation(fields: [operatingHourId], references: [id])
+  operatingHourId Int
+
+  @@map("restaurant")
+}
+
+model OperatingHour {
+  id            Int          @id @default(autoincrement())
+  openingHour   Time         @relation(name: "OpeningHourTime", fields: [openingTimeId], references: [id])
+  closingHour   Time         @relation(name: "ClosingHourTime", fields: [closingTimeId], references: [id])
+  openingTimeId Int
+  closingTimeId Int
+  restaurant    Restaurant[]
+
+  @@map("operating_hour")
+}
+
+model Time {
+  id     Int @id @default(autoincrement())
+  hour   Int
+  minute Int
+
+  openingHour OperatingHour[] @relation("OpeningHourTime")
+  closingHour OperatingHour[] @relation("ClosingHourTime")
+  @@map("time")
+}
+
+enum RESTAURANT_TYPE {
+  BUFFET
+  FAST_FOOD
+  FAST_CASUAL
+  CASUAL_DINING
+  FINE_DINING
+}
+
+model ProductCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  product Product[]
+  @@map("product_category")
+}
+
+model Product {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  image       String
+  price       Int
+  description String
+
+  productCategory   ProductCategory? @relation(fields: [productCategoryId], references: [id])
+  productCategoryId Int?
+
+  orderItem OrderItem[]
+  @@map("menu")
+}
+
+model Order {
+  id          Int          @id @default(autoincrement())
+  orderTime   DateTime
+  orderStatus ORDER_STATUS
+  orderItems  OrderItem[]
+
+  user   User @relation(name: "UserOrder", fields: [userId], references: [id])
+  userId Int
+
+  @@map("order")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+
+  @@map("order_item")
+}
+
+enum ORDER_STATUS {
+  RECEIVED
+  PREPARING
+  READY_FOR_DELIVERY
+  DELIVERING
+  DELIVERED
+}
