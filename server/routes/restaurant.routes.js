@@ -5,7 +5,6 @@ const {
   createRestaurant,
   updateRestaurant,
 } = require("../controllers/restaurant.controllers");
-const { prisma } = require("../lib/prisma");
 
 const router = express.Router();
 
