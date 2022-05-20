@@ -17,7 +17,7 @@ app.use("/restaurant", restaurantRoutes);
 //   UPDATE :id
 
 // GET /restaurant/:id
-// GET /restaurant
+// GET /restaurant => all restaurants
 // POST /restaurant
 // PATCH /restaurant/:id
 // DELETE /restaurant/:id
