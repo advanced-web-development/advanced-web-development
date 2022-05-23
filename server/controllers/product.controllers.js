@@ -2,8 +2,8 @@ const { prisma } = require("../lib/prisma");
 
 const getAllProducts = async (req, res) => {
   try {
-    const restaurants = await prisma.restaurant.findMany();
-    res.send({ data: restaurants });
+    const products = await prisma.product.findMany();
+    res.send({ data: products });
   } catch (error) {
     res.status(400).send({ error: error.message });
   }
@@ -11,18 +11,18 @@ const getAllProducts = async (req, res) => {
 
 const getProductFromId = async (req, res) => {
   try {
-    const restaurantId = req.params.id;
-    const restaurant = await prisma.restaurant.findUnique({
+    const productId = req.params.id;
+    const product = await prisma.product.findUnique({
       where: {
-        id: parseInt(restaurantId),
+        id: parseInt(productId),
       },
     });
 
-    if (!restaurant) {
-      throw new Error("Restaurant not found");
+    if (!product) {
+      throw new Error("Product not found");
     }
 
-    res.send({ data: restaurant });
+    res.send({ data: product });
   } catch (error) {
     res.status(400).send({ error: error.message });
   }
@@ -30,29 +30,24 @@ const getProductFromId = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const restaurantData = req.body;
-    const { openingHour, closingHour, ...restData } = restaurantData;
+    const productData = req.body;
+    const { productCategoryId, ...restData } = productData;
 
-    const newRestaurant = await prisma.restaurant.create({
+    const newProduct = await prisma.product.create({
       data: {
         ...restData,
-        operatingHour: {
-          create: {
-            closingHour: {
-              create: closingHour,
-            },
-            openingHour: {
-              create: openingHour,
-            },
+        productCategory: {
+          connect: {
+            id: parseInt(productCategoryId),
           },
         },
       },
     });
 
-    res.send({ data: newRestaurant });
+    res.send({ data: newProduct });
   } catch (error) {
     if (error.code === "P2002") {
-      res.status(400).send({ error: "Restaurant already exists" });
+      res.status(400).send({ error: "product already exists" });
     } else {
       res.status(400).send({ error: error.message });
     }
@@ -61,22 +56,29 @@ const createProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   try {
-    const restaurantIdToDelete = req.params.id;
-    const restaurant = await prisma.restaurant.findUnique({
+    const productIdToDelete = req.params.id;
+    const product = await prisma.product.findUnique({
       where: {
-        id: parseInt(restaurantIdToDelete),
+        id: parseInt(productIdToDelete),
       },
     });
-    if (!restaurant) {
-      throw new Error("Restaurant to delete not found");
+    if (!product) {
+      throw new Error("Product to delete not found");
     }
-    const deletedRestaurant = await prisma.restaurant.delete({
+
+    await prisma.orderItem.deleteMany({
       where: {
-        id: parseInt(restaurantIdToDelete),
+        productId: parseInt(productIdToDelete),
       },
     });
 
-    res.send({ data: deletedRestaurant });
+    const deletedProduct = await prisma.product.delete({
+      where: {
+        id: parseInt(productIdToDelete),
+      },
+    });
+
+    res.send({ data: deletedProduct });
   } catch (error) {
     res.status(400).send({ error: error.message });
   }
@@ -84,41 +86,35 @@ const deleteProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const restaurantIdToUpdate = req.params.id;
-    const restaurant = await prisma.restaurant.findUnique({
+    const productIdToUpdate = req.params.id;
+    const product = await prisma.product.findUnique({
       where: {
-        id: parseInt(restaurantIdToUpdate),
+        id: parseInt(productIdToUpdate),
       },
     });
-    if (!restaurant) {
-      throw new Error("Restaurant to update not found");
+    if (!product) {
+      throw new Error("product to update not found");
     }
 
-    const { openingHour, closingHour, ...restData } = req.body;
+    const { productCategoryId, ...restData } = req.body;
 
     let toUpdateData = {
       ...restData,
     };
 
-    if (openingHour || closingHour) {
-      toUpdateData.operatingHour = {
-        update: {
-          ...(openingHour && { openingHour: { update: openingHour } }),
-          ...(closingHour && { closingHour: { update: closingHour } }),
+    if (productCategoryId) {
+      toUpdateData.productCategory = {
+        connect: {
+          id: parseInt(productCategoryId),
         },
       };
     }
 
-    const updatedData = await prisma.restaurant.update({
-      where: { id: parseInt(restaurantIdToUpdate) },
+    const updatedData = await prisma.product.update({
+      where: { id: parseInt(productIdToUpdate) },
       data: toUpdateData,
       include: {
-        operatingHour: {
-          include: {
-            closingHour: true,
-            openingHour: true,
-          },
-        },
+        productCategory: true,
       },
     });
 
