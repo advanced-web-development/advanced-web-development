@@ -5,6 +5,7 @@ const app = express();
 const restaurantRoutes = require("./routes/restaurant.routes");
 const productRoutes = require("./routes/product.routes");
 const productCategoryRoutes = require("./routes/productCategory.routes");
+const authRoutes = require("./routes/auth.routes");
 
 app.use(bodyParser.json());
 
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 app.use("/restaurant", restaurantRoutes);
 app.use("/product", productRoutes);
 app.use("/productCategory", productCategoryRoutes);
+app.use("/auth", authRoutes);
 
 // /restaurant
 //   GET :id
