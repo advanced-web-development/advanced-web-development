@@ -38,6 +38,9 @@ model Restaurant {
   operatingHour   OperatingHour @relation(fields: [operatingHourId], references: [id])
   operatingHourId Int
 
+  Order           Order[]
+  Product         Product[]
+  ProductCategory ProductCategory[]
   @@map("restaurant")
 }
 
@@ -74,6 +77,9 @@ model ProductCategory {
   id   Int    @id @default(autoincrement())
   name String @unique
 
+  forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId  Int        @default(1)
+
   product Product[]
   @@map("product_category")
 }
@@ -84,6 +90,9 @@ model Product {
   image       String
   price       Int
   description String
+
+  forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId  Int        @default(1)
 
   productCategory   ProductCategory? @relation(fields: [productCategoryId], references: [id])
   productCategoryId Int?
@@ -97,6 +106,9 @@ model Order {
   orderTime   DateTime
   orderStatus ORDER_STATUS
   orderItems  OrderItem[]
+
+  forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId  Int
 
   user   User @relation(name: "UserOrder", fields: [userId], references: [id])
   userId Int
