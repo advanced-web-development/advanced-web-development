@@ -15,7 +15,8 @@ const requireAuth = (req, res, next) => {
             error: "Invalid token",
           });
         }
-        req.user = decodedToken;
+        req.userId = decodedToken.id;
+        req.userType = decodedToken.type;
         next();
       }
     );
