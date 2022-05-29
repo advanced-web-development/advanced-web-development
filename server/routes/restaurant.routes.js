@@ -4,20 +4,22 @@ const {
   getRestaurantFromId,
   createRestaurant,
   updateRestaurant,
+  deleteRestaurant,
 } = require("../controllers/restaurant.controllers");
+const { requireAuth } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // GET /restaurant
-router.get("/", getAllRestaurants);
+router.get("/", requireAuth, getAllRestaurants);
 
-router.get("/:id", getRestaurantFromId);
+router.get("/:id", requireAuth, getRestaurantFromId);
 
 // POST /restaurant
-router.post("/", createRestaurant);
+router.post("/", requireAuth, createRestaurant);
 
-router.delete("/:id");
+router.delete("/:id", requireAuth, deleteRestaurant);
 
-router.patch("/:id", updateRestaurant);
+router.patch("/:id", requireAuth, updateRestaurant);
 
 module.exports = router;

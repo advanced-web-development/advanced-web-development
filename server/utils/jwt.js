@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { config } = require("../constants/config");
 
 const signUser = (user) => {
-  return jwt.sign({ id: user.id, role: user.role }, config.accessTokenSecret, {
+  return jwt.sign({ id: user.id, type: user.type }, config.accessTokenSecret, {
     expiresIn: 60 * 60 * 24,
   });
 };

@@ -9,12 +9,12 @@ const {
 
 const router = express.Router();
 
-// GET /restaurant
+// GET /product
 router.get("/", getAllProducts);
 
 router.get("/:id", getProductFromId);
 
-// POST /restaurant
+// POST /product
 router.post("/", createProduct);
 
 router.delete("/:id", deleteProduct);

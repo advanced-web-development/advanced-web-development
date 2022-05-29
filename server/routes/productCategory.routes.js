@@ -7,19 +7,20 @@ const {
   deleteProductCategory,
   updateProductCategory,
 } = require("../controllers/productCategory.controllers");
+const { requireAuth } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // GET /restaurant
-router.get("/", getAllProductCategories);
+router.get("/", requireAuth, getAllProductCategories);
 
-router.get("/:id", getProductCategoryFromId);
+router.get("/:id", requireAuth, getProductCategoryFromId);
 
 // POST /restaurant
-router.post("/", createProductCategory);
+router.post("/", requireAuth, createProductCategory);
 
-router.delete("/:id", deleteProductCategory);
+router.delete("/:id", requireAuth, deleteProductCategory);
 
-router.patch("/:id", updateProductCategory);
+router.patch("/:id", requireAuth, updateProductCategory);
 
 module.exports = router;
