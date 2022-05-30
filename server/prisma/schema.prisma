@@ -107,6 +107,7 @@ model Order {
   orderStatus           ORDER_STATUS
   estimatedDeliveryTime Int          @default(60)
   orderItems            OrderItem[]
+  deliveryLocation      String       @default("")
 
   forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId  Int

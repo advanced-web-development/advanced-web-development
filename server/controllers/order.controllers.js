@@ -5,6 +5,7 @@ const prismaOrderSelectValues = {
   id: true,
   orderStatus: true,
   orderTime: true,
+  estimatedDeliveryTime: true,
   forRestaurant: {
     select: {
       id: true,
@@ -125,6 +126,7 @@ const placeOrder = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { orderDetail } = req.body;
+    // id status estimatedTime(in Integer representing minutes)
 
     await hasOrder(orderDetail.id);
     const updatedOrder = await prisma.order.update({
@@ -133,6 +135,7 @@ const updateOrderStatus = async (req, res) => {
       },
       data: {
         orderStatus: orderDetail.status,
+        estimatedDeliveryTime: parseInt(orderDetail.estimatedTime) || 0,
       },
     });
 
