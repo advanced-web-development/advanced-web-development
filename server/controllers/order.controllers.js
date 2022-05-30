@@ -1,4 +1,5 @@
 const { prisma } = require("../lib/prisma");
+const { hasOrder, hasRestaurant } = require("../utils/dbIdCheck");
 
 const prismaOrderSelectValues = {
   id: true,
@@ -17,6 +18,7 @@ const prismaOrderSelectValues = {
         select: {
           id: true,
           name: true,
+          price: true,
         },
       },
       quantity: true,
@@ -32,9 +34,14 @@ const prismaOrderSelectValues = {
 
 const getAllOrders = async (req, res) => {
   try {
+    const userId = parseInt(req.userId);
     const orders = await prisma.order.findMany({
       select: prismaOrderSelectValues,
+      where: {
+        userId,
+      },
     });
+
     res.send({ data: orders });
   } catch (error) {
     res.status(400).send({ error: error.message });
@@ -60,9 +67,17 @@ const getAllLoggedInUserOrders = async (req, res) => {
 
 const getAllRestaurantOrders = async (req, res) => {
   try {
-    const restaurantId = req.query.restaurantId;
+    let query = {};
+    const restaurantId = parseInt(req.query.restaurantId);
+    if (req.query.status) {
+      query = {
+        orderStatus: req.query.status,
+      };
+    }
+    await hasRestaurant(restaurantId);
     const orders = await prisma.order.findMany({
       where: {
+        ...query,
         forRestaurant: {
           id: parseInt(restaurantId),
         },
@@ -107,9 +122,53 @@ const placeOrder = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderDetail } = req.body;
+
+    await hasOrder(orderDetail.id);
+    const updatedOrder = await prisma.order.update({
+      where: {
+        id: orderDetail.id,
+      },
+      data: {
+        orderStatus: orderDetail.status,
+      },
+    });
+
+    res.send({ data: updatedOrder });
+  } catch (error) {
+    res.status(400).send({ error: error.message });
+  }
+};
+
+const getSingleOrder = async (req, res) => {
+  try {
+    const orderId = parseInt(req.params.id);
+    await hasOrder(orderId);
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: prismaOrderSelectValues,
+    });
+
+    let totalCost = 0;
+    order.orderItems.forEach(
+      (item) => (totalCost += item.quantity * item.product.price)
+    );
+
+    res.send({ data: { order, totalCost } });
+  } catch (error) {
+    res.status(400).send({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllOrders,
   placeOrder,
   getAllLoggedInUserOrders,
   getAllRestaurantOrders,
+  updateOrderStatus,
+  getSingleOrder,
 };

@@ -102,10 +102,11 @@ model Product {
 }
 
 model Order {
-  id          Int          @id @default(autoincrement())
-  orderTime   DateTime
-  orderStatus ORDER_STATUS
-  orderItems  OrderItem[]
+  id                    Int          @id @default(autoincrement())
+  orderTime             DateTime
+  orderStatus           ORDER_STATUS
+  estimatedDeliveryTime Int          @default(60)
+  orderItems            OrderItem[]
 
   forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId  Int

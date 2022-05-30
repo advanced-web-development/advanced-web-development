@@ -1,8 +1,27 @@
 const { prisma } = require("../lib/prisma");
+const { hasRestaurant } = require("../utils/dbIdCheck");
 
 const getAllProductCategories = async (req, res) => {
   try {
-    const products = await prisma.productCategory.findMany();
+    const restaurantId = parseInt(req.query.restaurantId);
+    await hasRestaurant(restaurantId);
+
+    const products = await prisma.productCategory.findMany({
+      where: {
+        restaurantId,
+      },
+      select: {
+        id: true,
+        name: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+          },
+        },
+      },
+    });
     res.send({ data: products });
   } catch (error) {
     res.status(400).send({ error: error.message });
