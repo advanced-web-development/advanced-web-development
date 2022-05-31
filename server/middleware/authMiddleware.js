@@ -56,7 +56,7 @@ const requireAdmin = (req, res, next) => {
         }
         req.userId = decodedToken.id;
         req.userType = decodedToken.type;
-        if (decodedToken.type !== "admin") {
+        if (decodedToken.type !== "ADMIN") {
           return res.status(401).json({
             status: "error",
             error: "Not authorized",

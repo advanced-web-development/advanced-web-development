@@ -31,11 +31,17 @@ const getRestaurantFromId = async (req, res) => {
 const createRestaurant = async (req, res) => {
   try {
     const restaurantData = req.body;
+    const userId = parseInt(req.userId);
     const { openingHour, closingHour, ...restData } = restaurantData;
 
     const newRestaurant = await prisma.restaurant.create({
       data: {
         ...restData,
+        adminUsers: {
+          connect: {
+            id: userId,
+          },
+        },
         operatingHour: {
           create: {
             closingHour: {
@@ -61,15 +67,31 @@ const createRestaurant = async (req, res) => {
 
 const deleteRestaurant = async (req, res) => {
   try {
+    const userId = parseInt(req.userId);
     const restaurantIdToDelete = req.params.id;
     const restaurant = await prisma.restaurant.findUnique({
       where: {
         id: parseInt(restaurantIdToDelete),
       },
+      select: {
+        id: true,
+        adminUsers: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
     if (!restaurant) {
       throw new Error("Restaurant to delete not found");
     }
+
+    const allAdminIds = restaurant.adminUsers.map((user) => user.id);
+
+    if (!allAdminIds.includes(userId)) {
+      throw new Error("You are not authorized to delete this restaurant");
+    }
+
     const deletedRestaurant = await prisma.restaurant.delete({
       where: {
         id: parseInt(restaurantIdToDelete),
