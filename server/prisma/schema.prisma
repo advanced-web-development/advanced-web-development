@@ -75,10 +75,10 @@ enum RESTAURANT_TYPE {
 
 model ProductCategory {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  name String
 
   forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  restaurantId  Int        @default(1)
+  restaurantId  Int
 
   product Product[]
   @@map("product_category")
@@ -86,13 +86,13 @@ model ProductCategory {
 
 model Product {
   id          Int    @id @default(autoincrement())
-  name        String @unique
+  name        String
   image       String
   price       Int
   description String
 
   forRestaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  restaurantId  Int        @default(1)
+  restaurantId  Int
 
   productCategory   ProductCategory? @relation(fields: [productCategoryId], references: [id])
   productCategoryId Int?

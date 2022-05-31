@@ -39,11 +39,16 @@ const getProductFromId = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const productData = req.body;
-    const { productCategoryId, ...restData } = productData;
+    const { productCategoryId, restaurantId, ...restData } = productData;
 
     const newProduct = await prisma.product.create({
       data: {
         ...restData,
+        forRestaurant: {
+          connect: {
+            id: parseInt(restaurantId),
+          },
+        },
         productCategory: {
           connect: {
             id: parseInt(productCategoryId),
