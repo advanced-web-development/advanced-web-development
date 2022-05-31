@@ -12,7 +12,38 @@ const createUser = async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     const user = await prisma.user.create({
-      data: { ...restData, password: hashedPassword },
+      data: { ...restData, password: hashedPassword, type: "CONSUMER" },
+    });
+
+    if (!user) {
+      throw new Error("Error creating user");
+    }
+
+    const token = signUser(user);
+
+    res.status(200).send({ status: "success", data: token });
+  } catch (error) {
+    if (error.code === "P2002") {
+      res.status(400).send({
+        status: "error",
+        error: `User with given email already exists`,
+      });
+    } else {
+      res.status(400).send({ status: "error", error: error.message });
+    }
+  }
+};
+
+const createAdminUser = async (req, res) => {
+  try {
+    const { userDetail } = req.body;
+
+    const { password, ...restData } = userDetail;
+
+    const hashedPassword = await hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: { ...restData, password: hashedPassword, type: "ADMIN" },
     });
 
     if (!user) {
@@ -88,4 +119,4 @@ const getLoggedInUserData = async (req, res) => {
   }
 };
 
-module.exports = { createUser, signIn, getLoggedInUserData };
+module.exports = { createUser, signIn, getLoggedInUserData, createAdminUser };
