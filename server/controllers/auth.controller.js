@@ -66,4 +66,26 @@ const signIn = async (req, res) => {
   }
 };
 
-module.exports = { createUser, signIn };
+const getLoggedInUserData = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(req.userId) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        type: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    res.send({ data: user });
+  } catch (error) {
+    res.status(400).send({ error: error.message });
+  }
+};
+
+module.exports = { createUser, signIn, getLoggedInUserData };

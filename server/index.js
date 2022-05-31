@@ -7,6 +7,7 @@ const productRoutes = require("./routes/product.routes");
 const productCategoryRoutes = require("./routes/productCategory.routes");
 const authRoutes = require("./routes/auth.routes");
 const orderRoutes = require("./routes/order.routes");
+const transactionRoutes = require("./routes/transaction.routes");
 
 app.use(bodyParser.json());
 
@@ -19,6 +20,7 @@ app.use("/product", productRoutes);
 app.use("/productCategory", productCategoryRoutes);
 app.use("/auth", authRoutes);
 app.use("/order", orderRoutes);
+app.use("/transaction", transactionRoutes);
 
 // /restaurant
 //   GET :id
