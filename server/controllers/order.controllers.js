@@ -167,6 +167,69 @@ const getSingleOrder = async (req, res) => {
   }
 };
 
+const finalCheckout = async (req, res) => {
+  try {
+    const body = req.body;
+    const orderId = parseInt(body.orderId);
+    await hasOrder(orderId);
+    const orderDetail = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      select: {
+        id: true,
+        userId: true,
+        orderItems: {
+          select: {
+            id: true,
+            quantity: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    let transactionTotal = 0;
+    orderDetail.orderItems.forEach((item) => {
+      transactionTotal += item.product.price * item.quantity;
+    });
+
+    const updatedOrder = await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        orderStatus: "DELIVERED",
+      },
+    });
+
+    await prisma.transactions.create({
+      data: {
+        amount: transactionTotal,
+        order: {
+          connect: {
+            id: orderId,
+          },
+        },
+        user: {
+          connect: {
+            id: orderDetail.userId,
+          },
+        },
+      },
+    });
+
+    res.send({ data: updatedOrder });
+  } catch (error) {
+    res.status(400).send({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllOrders,
   placeOrder,
@@ -174,4 +237,5 @@ module.exports = {
   getAllRestaurantOrders,
   updateOrderStatus,
   getSingleOrder,
+  finalCheckout,
 };

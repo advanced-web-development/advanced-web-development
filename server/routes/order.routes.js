@@ -5,8 +5,9 @@ const {
   getAllRestaurantOrders,
   updateOrderStatus,
   getSingleOrder,
+  finalCheckout,
 } = require("../controllers/order.controllers");
-const { requireAuth } = require("../middleware/authMiddleware");
+const { requireAuth, requireAdmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.get("/", requireAuth, getAllLoggedInUserOrders);
 router.get("/:id", requireAuth, getSingleOrder);
 router.get("/restaurant", requireAuth, getAllRestaurantOrders);
 router.post("/", requireAuth, placeOrder);
-router.patch("/status", requireAuth, updateOrderStatus);
+router.post("/checkout", requireAuth, finalCheckout);
+router.patch("/status", requireAdmin, updateOrderStatus);
 
 module.exports = router;
